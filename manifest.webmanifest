@@ -1,0 +1,11 @@
+{
+  "name": "Winter Arc 90",
+  "short_name": "Winter Arc",
+  "description": "90-day Winter Arc habit and progress tracker.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#070b12",
+  "theme_color": "#070b12",
+  "orientation": "portrait-primary",
+  "icons": []
+}

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Winter Arc — 90 Days</title>
+<style>
+:root{--bg:#09090b;--card:#131316;--card2:#19191e;--text:#f4f4f5;--muted:#a1a1aa;--line:#27272a;--good:#4ade80;--bad:#f87171;--accent:#fff}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#09090b,#111114);color:var(--text);font-family:Inter,system-ui,sans-serif}
+.wrap{max-width:1050px;margin:auto;padding:24px 18px 50px}
+header{padding:18px 0 24px;display:flex;justify-content:space-between;gap:16px;align-items:flex-end}
+h1{font-size:clamp(32px,7vw,54px);margin:0;letter-spacing:-2px}.sub{color:var(--muted);margin-top:6px}
+.daynav{display:flex;gap:8px;align-items:center}.btn{background:var(--card);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:10px 13px;cursor:pointer}.btn:hover{background:var(--card2)}
+.quote{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;margin-bottom:18px}
+.quote small{color:var(--muted);text-transform:uppercase;letter-spacing:1.5px}.quote p{font-size:20px;line-height:1.45;margin:10px 0 0}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:15px}.stat b{display:block;font-size:25px}.stat span{color:var(--muted);font-size:12px}
+.progress{height:9px;background:#27272a;border-radius:99px;overflow:hidden;margin:9px 0}.fill{height:100%;background:#fff;border-radius:99px;transition:.25s}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:18px}.card h2{font-size:18px;margin:0 0 14px}
+.habits{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.habit{display:flex;align-items:center;gap:12px;padding:14px;background:var(--card2);border:1px solid var(--line);border-radius:13px;cursor:pointer;user-select:none}
+.habit input{display:none}.check{width:23px;height:23px;border:1px solid #52525b;border-radius:7px;display:grid;place-items:center;flex:none}.habit.done{border-color:#3f3f46}.habit.done .check{background:#fff;border-color:#fff;color:#000}.habit.done .check:after{content:"✓";font-weight:900}.habit.done .name{text-decoration:line-through;color:#a1a1aa}
+.score{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}.score strong{font-size:30px}
+.history{display:grid;grid-template-columns:repeat(10,1fr);gap:7px}.day{border:1px solid var(--line);background:var(--card2);border-radius:9px;padding:9px 4px;text-align:center;cursor:pointer}.day.active{outline:2px solid #fff}.day .n{font-weight:700}.day .p{font-size:11px;color:var(--muted);margin-top:3px}
+.day.win-blue{border-color:#60a5fa;background:rgba(96,165,250,.16)}
+.day.win-green{border-color:#4ade80;background:rgba(74,222,128,.12)}
+.day.win-yellow{border-color:#facc15;background:rgba(250,204,21,.10)}
+.day.win-red{border-color:#f87171;background:rgba(248,113,113,.10)}
+.day.empty{opacity:.65}
+.note{width:100%;min-height:85px;background:#0f0f12;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:12px;resize:vertical;font:inherit}
+.actions{display:flex;gap:8px;flex-wrap:wrap}.danger{color:#fca5a5}.finish{background:#fff;color:#09090b;border-color:#fff;font-weight:750}.finish:hover{background:#e4e4e7}
+@media(max-width:700px){header{align-items:flex-start;flex-direction:column}.stats{grid-template-columns:repeat(2,1fr)}.habits{grid-template-columns:1fr}.history{grid-template-columns:repeat(6,1fr)}}
+</style>
+
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#070b12">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Winter Arc">
+
+</head>
+<body>
+<div class="wrap">
+<header>
+ <div><h1>WINTER ARC</h1><div class="sub">90 days. One standard. No excuses.</div></div>
+ <div class="daynav"><button class="btn" onclick="move(-1)">←</button><button class="btn" onclick="move(1)">→</button></div>
+</header>
+
+<section class="quote"><small id="dayLabel">DAY 1 / 90</small><p id="quote"></p></section>
+
+<section class="stats">
+ <div class="stat"><b id="todayScore">0/10</b><span>Today's wins</span></div>
+ <div class="stat"><b id="todayPct">0%</b><span>Today's completion</span></div>
+ <div class="stat"><b id="overallPct">0%</b><span>Overall completion</span></div>
+ <div class="stat"><b id="totalWins">0</b><span>Total wins</span></div>
+ <div class="stat"><b id="streak">0</b><span>Current streak</span></div>
+</section>
+
+<section class="card">
+ <div class="score"><div><h2>Today's progress</h2></div><strong id="pctBig">0%</strong></div>
+ <div class="progress"><div class="fill" id="fill"></div></div>
+ <div class="habits" id="habits"></div>
+</section>
+
+<section class="card">
+ <h2>Daily note</h2>
+ <textarea class="note" id="note" placeholder="Write what went well, what didn't, or what you learned today..."></textarea>
+</section>
+
+<section class="card">
+ <h2>90-day history</h2>
+ <div class="history" id="history"></div>
+</section>
+
+<section class="card">
+ <div class="actions">
+  <button class="btn finish" onclick="finishDay()">✓ Finish Day & Go to Next Day</button>
+  <button class="btn" onclick="goToday()">Go to today</button>
+  <button class="btn danger" onclick="resetAll()">Reset all data</button>
+ </div>
+</section>
+</div>
+
+<script>
+const habits=[
+ "Gym / workout","Today's live class","HW + notes","Question practice",
+ "7+ hours sleep","Only water","No junk food / chips","1 km run",
+ "Revision","No unnecessary scrolling"
+];
+const quotes=[
+"Discipline is choosing between what you want now and what you want most.",
+"Small progress is still progress. Keep moving.",
+"You don't need a perfect day. You need another honest one.",
+"Do the work before you negotiate with yourself.",
+"Consistency makes ordinary actions extraordinary.",
+"Your future is built in the boring repetitions.",
+"Don't wait for motivation. Start, then let momentum follow.",
+"One focused day can change the direction of a week.",
+"Keep the promise you made to yourself.",
+"Less scrolling. More building.",
+"Your competition is yesterday's version of you.",
+"Action creates confidence.",
+"Finish the day stronger than you started it.",
+"Do it tired. Do it imperfectly. Just do it.",
+"Protect your attention like it matters—because it does.",
+"Every question solved is one less question you fear.",
+"Quiet work compounds.",
+"Make today's standard tomorrow's baseline.",
+"Don't break the chain.",
+"Earn your confidence through evidence.",
+"One day at a time. Ninety days is built from those days.",
+"Your habits are votes for the person you're becoming.",
+"Start before you feel ready.",
+"Progress doesn't need an audience.",
+"Be consistent enough that results become inevitable.",
+"Hard days count too.",
+"Control what you can control today.",
+"Focus on the next rep, next question, next hour.",
+"Make it simple. Make it repeatable.",
+"Don't chase intensity. Build durability.",
+"Show up again."
+];
+let data=JSON.parse(localStorage.getItem("winterArc90")||"{}");
+let selected=Number(localStorage.getItem("winterSelected")||1);
+const key=d=>String(d);
+function getDay(d){if(!data[key(d)])data[key(d)]={h:Array(habits.length).fill(false),note:""};return data[key(d)]}
+function save(){localStorage.setItem("winterArc90",JSON.stringify(data));localStorage.setItem("winterSelected",selected)}
+function render(){
+ let x=getDay(selected), wins=x.h.filter(Boolean).length, pct=Math.round(wins/habits.length*100);
+ document.getElementById("dayLabel").textContent=`DAY ${selected} / 90`;
+ document.getElementById("quote").textContent=quotes[(selected-1)%quotes.length];
+ document.getElementById("todayScore").textContent=`${wins}/${habits.length}`;
+ document.getElementById("todayPct").textContent=pct+"%";
+ document.getElementById("pctBig").textContent=pct+"%";
+ document.getElementById("fill").style.width=pct+"%";
+ document.getElementById("note").value=x.note||"";
+ let total=0,possible=90*habits.length;
+ for(let d=1;d<=90;d++) total+=getDay(d).h.filter(Boolean).length;
+ document.getElementById("overallPct").textContent=Math.round(total/possible*100)+"%";
+ document.getElementById("totalWins").textContent=total;
+ let streak=0;
+ for(let d=selected;d>=1;d--){if(getDay(d).h.every(Boolean))streak++;else break}
+ document.getElementById("streak").textContent=streak;
+ document.getElementById("habits").innerHTML=habits.map((h,i)=>`<label class="habit ${x.h[i]?'done':''}"><input type="checkbox" ${x.h[i]?'checked':''} onchange="toggle(${i})"><span class="check"></span><span class="name">${h}</span></label>`).join("");
+ document.getElementById("history").innerHTML=Array.from({length:90},(_,i)=>{let d=i+1,w=getDay(d).h.filter(Boolean).length,p=Math.round(w/habits.length*100);let tone = w === 10 ? "win-blue" : (w >= 7 ? "win-green" : (w >= 3 ? "win-yellow" : "win-red"));
+return `<div class="day ${d===selected?'active':''} ${tone} ${w===0?'empty':''}" onclick="selectDay(${d})"><div class="n">${d}</div><div class="p">${w}/${habits.length}</div></div>`}).join("");
+}
+function toggle(i){getDay(selected).h[i]=!getDay(selected).h[i];save();render()}
+function selectDay(d){selected=d;save();render()}
+function move(n){selected=Math.max(1,Math.min(90,selected+n));save();render()}
+function goToday(){let start=new Date(2026,9,1),now=new Date();let d=Math.floor((now-start)/86400000)+1;selected=Math.max(1,Math.min(90,d));save();render()}
+function finishDay(){
+  if(selected>=90){alert("Winter Arc complete. 90/90 days.");return}
+  const wins=getDay(selected).h.filter(Boolean).length;
+  if(wins===0){
+    if(!confirm("You have 0 wins today. Finish this day anyway and move to Day "+(selected+1)+"?")) return;
+  } else if(wins<habits.length){
+    if(!confirm("Day "+selected+" is "+Math.round(wins/habits.length*100)+"% complete. Finish it and move to Day "+(selected+1)+"?")) return;
+  }
+  selected++;
+  save();
+  render();
+}
+function resetAll(){if(confirm("Reset all 90-day progress?")){localStorage.removeItem("winterArc90");selected=1;save();render()}}
+document.getElementById("note").addEventListener("input",e=>{getDay(selected).note=e.target.value;save()});
+render();
+</script>
+
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(() => {});
+  });
+}
+</script>
+
+</body>
+</html>
